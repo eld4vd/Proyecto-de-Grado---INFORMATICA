@@ -1,0 +1,34 @@
+# Entorno virtual Python
+.venv/
+.playwright-mcp/
+docx
+diagramas y recursos
+diagramas-guia.md
+.txt
+.sql
+# Archivos de IA / Agentes Copilot
+.agents/
+skills-lock.json
+
+# VS Code workspace settings
+.vscode/
+
+# Entornos Docker (reales)
+.env.docker.local
+.env.docker.prod
+backend/.env.docker.local
+backend/.env.docker.prod
+frontend/.env.docker.local
+frontend/.env.docker.prod
+
+# Entornos locales reales (no subir)
+backend/.env
+frontend/.env.local
+
+# Permitir plantillas públicas
+!.env*.example
+!backend/.env*.example
+!frontend/.env*.example
+
+# Archivo Windows nul
+nul

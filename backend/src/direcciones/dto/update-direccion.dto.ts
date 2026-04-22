@@ -1,0 +1,6 @@
+import { PartialType, OmitType } from '@nestjs/mapped-types';
+import { CreateDireccionDto } from './create-direccion.dto';
+
+export class UpdateDireccionDto extends PartialType(
+  OmitType(CreateDireccionDto, ['clienteId'] as const),
+) {}

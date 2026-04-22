@@ -1,0 +1,93 @@
+===============================================
+PLANTILLA DE VARIABLES GLOBALES (REEMPLAZOS)
+===============================================
+
+Objetivo:
+- Rellenar solo valores globales que luego se usan para reemplazar variables.
+- Sin pasos de VPS, sin comandos, sin checklist operativo.
+
+Fecha: 2026-04-12
+Responsable: eld4vd
+
+
+[A] IDENTIDAD PUBLICA (IP + DOMINIO)
+-----------------------------------------------
+IP_PUBLICA=AAA.BBB.CCC.DDD
+IPV6_PUBLICA=N/A
+DOMINIO_PRINCIPAL=example.com
+DOMINIO_WWW=www.example.com
+
+
+[B] URLS GLOBALES FINALES
+-----------------------------------------------
+SITE_URL=https://example.com
+API_PUBLIC_URL=https://example.com/api
+
+
+[C] VARIABLES GLOBALES DE ENTORNO (OBLIGATORIAS)
+-----------------------------------------------
+DOMAIN=example.com
+POSTGRES_USER=app_user
+POSTGRES_PASSWORD=replace_with_strong_db_password
+POSTGRES_DB=app_db
+JWT_SECRET=replace_with_access_token_secret
+JWT_REFRESH_SECRET=replace_with_refresh_token_secret
+GROQ_API_KEY=replace_with_groq_api_key
+CERTBOT_EMAIL=admin@example.com
+
+
+[D] VARIABLES GLOBALES DE RED INTERNA (DOCKER)
+-----------------------------------------------
+BACKEND_URL=http://backend:3001
+BACKEND_INTERNAL_URL=http://backend:3001
+NEXT_PUBLIC_SITE_URL=https://example.com
+NEXT_PUBLIC_API_URL=https://example.com/api
+
+
+[E] OPCIONALES GLOBALES (SI APLICA)
+-----------------------------------------------
+SMTP_HOST=PENDIENTE
+SMTP_PORT=PENDIENTE
+SMTP_USER=PENDIENTE
+SMTP_PASSWORD=PENDIENTE
+SENTRY_DSN=PENDIENTE
+ANALYTICS_ID=PENDIENTE
+
+
+[F] BLOQUE UNICO PARA REEMPLAZO RAPIDO (COPIAR/PEGAR)
+-----------------------------------------------
+IP_PUBLICA=AAA.BBB.CCC.DDD
+IPV6_PUBLICA=N/A
+DOMINIO_PRINCIPAL=example.com
+DOMINIO_WWW=www.example.com
+SITE_URL=https://example.com
+API_PUBLIC_URL=https://example.com/api
+DOMAIN=example.com
+POSTGRES_USER=app_user
+POSTGRES_PASSWORD=replace_with_strong_db_password
+POSTGRES_DB=app_db
+JWT_SECRET=replace_with_access_token_secret
+JWT_REFRESH_SECRET=replace_with_refresh_token_secret
+GROQ_API_KEY=replace_with_groq_api_key
+CERTBOT_EMAIL=admin@example.com
+BACKEND_URL=http://backend:3001
+BACKEND_INTERNAL_URL=http://backend:3001
+NEXT_PUBLIC_SITE_URL=https://example.com
+NEXT_PUBLIC_API_URL=https://example.com/api
+SMTP_HOST=PENDIENTE
+SMTP_PORT=PENDIENTE
+SMTP_USER=PENDIENTE
+SMTP_PASSWORD=PENDIENTE
+SENTRY_DSN=PENDIENTE
+ANALYTICS_ID=PENDIENTE
+
+
+NOTAS CORTAS
+-----------------------------------------------
+- Si aun no tienes un dato, pon PENDIENTE.
+- Si no aplica, pon N/A.
+
+FALTANTES CLAVE PARA CIERRE DE PRODUCCION
+-----------------------------------------------
+- Ninguno obligatorio pendiente para entorno de prueba.
+- Opcionales aún pendientes: SMTP_*, SENTRY_DSN, ANALYTICS_ID.

@@ -1,0 +1,89 @@
+# ===========================================
+# Docker Compose - DESARROLLO LOCAL
+# Stack: Next.js + NestJS + Prisma + PostgreSQL
+# ===========================================
+# USO:
+#   1. Copiar: cp .env.docker.local.example .env.docker.local
+#   2. Editar .env.docker.local con tus valores
+#   3. Levantar: docker compose --env-file .env.docker.local up -d --build
+#   4. Ver logs: docker compose --env-file .env.docker.local logs -f
+#   5. Parar: docker compose --env-file .env.docker.local down
+# ===========================================
+
+services:
+  # ──────────────────────────────────────
+  # PostgreSQL 16
+  # ──────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: tech_postgres_dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # ──────────────────────────────────────
+  # Backend - NestJS + Prisma
+  # ──────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: tech_backend_dev
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=public
+      PORT: 3001
+      NODE_ENV: development
+      CORS_ORIGIN: http://localhost:${FRONTEND_PORT:-3010}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+      # /app/dist eliminado — bloqueaba a NestJS al hacer rmdir
+      - /app/src/generated
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # ──────────────────────────────────────
+  # Frontend - Next.js
+  # ──────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: tech_frontend_dev
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_SITE_URL: http://localhost:${FRONTEND_PORT:-3010}
+      BACKEND_URL: http://backend:3001
+      BACKEND_INTERNAL_URL: http://backend:3001
+      NEXT_PUBLIC_API_URL: http://localhost:3001/api
+      PORT: 3000
+    ports:
+      - "${FRONTEND_PORT:-3010}:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data_dev:
+    name: tech_postgres_data_dev

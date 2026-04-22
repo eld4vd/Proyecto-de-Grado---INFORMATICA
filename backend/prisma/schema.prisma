@@ -1,0 +1,426 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ==========================================
+// ENUMS
+// ==========================================
+
+enum EstadoCarrito {
+  ACTIVO
+  CONVERTIDO
+  ABANDONADO
+}
+
+enum EstadoOrden {
+  PENDIENTE
+  PAGADO
+  ENVIADO
+  ENTREGADO
+  CANCELADO
+}
+
+enum EstadoPago {
+  PENDIENTE
+  APROBADO
+  RECHAZADO
+  REEMBOLSADO
+}
+
+enum EstadoEnvio {
+  PENDIENTE
+  EN_CAMINO
+  ENTREGADO
+}
+
+// ==========================================
+// ADMIN (Dashboard)
+// ==========================================
+
+model AdminUsuario {
+  id            String    @id @default(uuid()) @db.Uuid
+  email         String    @unique @db.VarChar(255)
+  passwordHash  String    @map("password_hash") @db.Text
+  nombre        String?   @db.VarChar(255)
+  activo        Boolean   @default(true)
+  lastLoginAt   DateTime? @map("last_login_at") @db.Timestamptz
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt     DateTime? @map("deleted_at") @db.Timestamptz
+
+  @@map("admin_usuarios")
+}
+
+// ==========================================
+// CATÁLOGO
+// ==========================================
+
+model Categoria {
+  id                String      @id @default(uuid()) @db.Uuid
+  nombre            String      @db.VarChar(255)
+  slug              String      @unique @db.VarChar(255)
+  descripcion       String?     @db.Text
+  categoriaPadreId  String?     @map("categoria_padre_id") @db.Uuid
+  imagenUrl         String?     @map("imagen_url") @db.VarChar(500)
+  activo            Boolean     @default(true)
+  createdAt         DateTime    @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt         DateTime    @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt         DateTime?   @map("deleted_at") @db.Timestamptz
+
+  // Relaciones
+  categoriaPadre    Categoria?           @relation("SubcategoriaDeCategoria", fields: [categoriaPadreId], references: [id], onDelete: SetNull)
+  subcategorias     Categoria[]          @relation("SubcategoriaDeCategoria")
+  productoCategorias ProductoCategoria[]
+
+  @@index([categoriaPadreId])
+  @@index([activo])
+  @@map("categorias")
+}
+
+model Marca {
+  id        String    @id @default(uuid()) @db.Uuid
+  nombre    String    @db.VarChar(255)
+  slug      String    @unique @db.VarChar(255)
+  logoUrl   String?   @map("logo_url") @db.VarChar(500)
+  activo    Boolean   @default(true)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz
+
+  // Relaciones
+  productos Producto[]
+
+  @@index([activo])
+  @@map("marcas")
+}
+
+model Producto {
+  id          String    @id @default(uuid()) @db.Uuid
+  sku         String    @unique @db.VarChar(100)
+  nombre      String    @db.VarChar(500)
+  slug        String    @unique @db.VarChar(500)
+  descripcion String    @db.Text
+  marcaId     String?   @map("marca_id") @db.Uuid
+  precio      Decimal   @db.Decimal(12, 2)
+  precioOferta Decimal? @map("precio_oferta") @db.Decimal(12, 2)
+  stock       Int       @default(0)
+  activo      Boolean   @default(true)
+  destacado   Boolean   @default(false)
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt   DateTime? @map("deleted_at") @db.Timestamptz
+
+  // Relaciones
+  marca                  Marca?                     @relation(fields: [marcaId], references: [id], onDelete: SetNull)
+  productoCategorias     ProductoCategoria[]
+  imagenes               ImagenProducto[]
+  especificaciones       EspecificacionProducto[]
+  itemsCarrito           ItemCarrito[]
+  itemsOrden             ItemOrden[]
+  resenas                Resena[]
+  favoritos              Favorito[]
+
+  @@index([marcaId])
+  @@index([activo])
+  @@index([destacado])
+  @@map("productos")
+}
+
+model ProductoCategoria {
+  productoId  String   @map("producto_id") @db.Uuid
+  categoriaId String   @map("categoria_id") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  // Relaciones
+  producto  Producto  @relation(fields: [productoId], references: [id], onDelete: Cascade)
+  categoria Categoria @relation(fields: [categoriaId], references: [id], onDelete: Cascade)
+
+  @@id([productoId, categoriaId])
+  @@map("productos_categorias")
+}
+
+model ImagenProducto {
+  id          String   @id @default(uuid()) @db.Uuid
+  productoId  String   @map("producto_id") @db.Uuid
+  url         String   @db.VarChar(500)
+  esPrincipal Boolean  @default(false) @map("es_principal")
+  orden       Int      @default(0)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  // Relaciones
+  producto Producto @relation(fields: [productoId], references: [id], onDelete: Cascade)
+
+  @@index([productoId])
+  @@map("imagenes_producto")
+}
+
+model EspecificacionProducto {
+  id         String   @id @default(uuid()) @db.Uuid
+  productoId String   @map("producto_id") @db.Uuid
+  nombre     String   @db.VarChar(255)
+  valor      String   @db.Text
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  // Relaciones
+  producto Producto @relation(fields: [productoId], references: [id], onDelete: Cascade)
+
+  @@index([productoId])
+  @@map("especificaciones_producto")
+}
+
+// ==========================================
+// CLIENTES (con login)
+// ==========================================
+
+model Cliente {
+  id           String    @id @default(uuid()) @db.Uuid
+  nombre       String    @db.VarChar(255)
+  apellido     String    @db.VarChar(255)
+  email        String    @unique @db.VarChar(255)
+  passwordHash String    @map("password_hash") @db.Text
+  telefono     String?   @db.VarChar(50)
+  nitCi        String?   @map("nit_ci") @db.VarChar(50)
+  lastLoginAt  DateTime? @map("last_login_at") @db.Timestamptz
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt    DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt    DateTime? @map("deleted_at") @db.Timestamptz
+
+  // Relaciones
+  direcciones Direccion[]
+  carritos    Carrito[]
+  ordenes     Orden[]
+  resenas     Resena[]
+  favoritos   Favorito[]
+
+  @@map("clientes")
+}
+
+model Direccion {
+  id              String    @id @default(uuid()) @db.Uuid
+  clienteId       String    @map("cliente_id") @db.Uuid
+  calle           String    @db.VarChar(500)
+  ciudad          String    @db.VarChar(255)
+  departamento    String    @db.VarChar(255)
+  codigoPostal    String?   @map("codigo_postal") @db.VarChar(20)
+  esPredeterminada Boolean  @default(false) @map("es_predeterminada")
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt       DateTime? @map("deleted_at") @db.Timestamptz
+
+  // Relaciones
+  cliente Cliente @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+
+  @@index([clienteId])
+  @@map("direcciones")
+}
+
+// ==========================================
+// CARRITO
+// ==========================================
+
+model Carrito {
+  id        String        @id @default(uuid()) @db.Uuid
+  clienteId String        @map("cliente_id") @db.Uuid
+  estado    EstadoCarrito @default(ACTIVO)
+  createdAt DateTime      @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime      @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relaciones
+  cliente Cliente       @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  items   ItemCarrito[]
+
+  @@index([clienteId])
+  @@index([estado])
+  @@map("carritos")
+}
+
+model ItemCarrito {
+  id             String   @id @default(uuid()) @db.Uuid
+  carritoId      String   @map("carrito_id") @db.Uuid
+  productoId     String   @map("producto_id") @db.Uuid
+  cantidad       Int
+  precioUnitario Decimal? @map("precio_unitario") @db.Decimal(12, 2)
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relaciones
+  carrito  Carrito  @relation(fields: [carritoId], references: [id], onDelete: Cascade)
+  producto Producto @relation(fields: [productoId], references: [id], onDelete: Cascade)
+
+  @@unique([carritoId, productoId])
+  @@index([carritoId])
+  @@index([productoId])
+  @@map("items_carrito")
+}
+
+// ==========================================
+// ÓRDENES Y VENTAS
+// ==========================================
+
+model Orden {
+  id                  String      @id @default(uuid()) @db.Uuid
+  numeroOrden         String      @unique @map("numero_orden") @db.VarChar(50)
+  clienteId           String      @map("cliente_id") @db.Uuid
+  estado              EstadoOrden @default(PENDIENTE)
+  estadoPago          EstadoPago  @default(PENDIENTE) @map("estado_pago")
+  subtotal            Decimal     @db.Decimal(12, 2)
+  descuento           Decimal     @default(0) @db.Decimal(12, 2)
+  costoEnvio          Decimal     @default(0) @map("costo_envio") @db.Decimal(12, 2)
+  total               Decimal     @db.Decimal(12, 2)
+  direccionEnvioTexto String?     @map("direccion_envio_texto") @db.Text
+  notas               String?     @db.Text
+  codigoPromocionalId String?     @map("codigo_promocional_id") @db.Uuid
+  createdAt           DateTime    @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt           DateTime    @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relaciones
+  cliente Cliente     @relation(fields: [clienteId], references: [id], onDelete: Restrict)
+  items   ItemOrden[]
+  pagos   Pago[]
+  envio   Envio?
+  codigoPromocional CodigoPromocional? @relation(fields: [codigoPromocionalId], references: [id], onDelete: SetNull)
+
+  @@index([clienteId])
+  @@index([estado])
+  @@index([estadoPago])
+  @@index([createdAt])
+  @@map("ordenes")
+}
+
+model ItemOrden {
+  id             String   @id @default(uuid()) @db.Uuid
+  ordenId        String   @map("orden_id") @db.Uuid
+  productoId     String   @map("producto_id") @db.Uuid
+  cantidad       Int
+  precioUnitario Decimal  @map("precio_unitario") @db.Decimal(12, 2)
+  subtotal       Decimal  @db.Decimal(12, 2)
+  nombreProducto String?  @map("nombre_producto") @db.VarChar(500)
+  sku            String?  @db.VarChar(100)
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  // Relaciones
+  orden    Orden    @relation(fields: [ordenId], references: [id], onDelete: Cascade)
+  producto Producto @relation(fields: [productoId], references: [id], onDelete: Restrict)
+
+  @@index([ordenId])
+  @@index([productoId])
+  @@map("items_orden")
+}
+
+model Pago {
+  id            String      @id @default(uuid()) @db.Uuid
+  ordenId       String      @map("orden_id") @db.Uuid
+  monto         Decimal     @db.Decimal(12, 2)
+  metodoPago    String      @map("metodo_pago") @db.VarChar(50)
+  transaccionId String?     @map("transaccion_id") @db.VarChar(255)
+  estado        EstadoPago  @default(PENDIENTE)
+  fechaPago     DateTime?   @map("fecha_pago") @db.Timestamptz
+  createdAt     DateTime    @default(now()) @map("created_at") @db.Timestamptz
+
+  // Relaciones
+  orden Orden @relation(fields: [ordenId], references: [id], onDelete: Cascade)
+
+  @@index([ordenId])
+  @@map("pagos")
+}
+
+// ==========================================
+// ENVÍOS
+// ==========================================
+
+model Envio {
+  id                 String        @id @default(uuid()) @db.Uuid
+  ordenId            String        @unique @map("orden_id") @db.Uuid
+  numeroSeguimiento  String?       @map("numero_seguimiento") @db.VarChar(255)
+  transportista      String?       @db.VarChar(255)
+  estado             EstadoEnvio   @default(PENDIENTE)
+  enviadoEn          DateTime?     @map("enviado_en") @db.Timestamptz
+  entregadoEn        DateTime?     @map("entregado_en") @db.Timestamptz
+  createdAt          DateTime      @default(now()) @map("created_at") @db.Timestamptz
+
+  // Relaciones
+  orden Orden @relation(fields: [ordenId], references: [id], onDelete: Cascade)
+
+  @@map("envios")
+}
+
+// ==========================================
+// RESEÑAS (asociadas a clientes logueados)
+// ==========================================
+
+model Resena {
+  id           String    @id @default(uuid()) @db.Uuid
+  productoId   String    @map("producto_id") @db.Uuid
+  clienteId    String    @map("cliente_id") @db.Uuid
+  ordenId      String?   @map("orden_id") @db.Uuid
+  calificacion Int
+  titulo       String?   @db.VarChar(255)
+  comentario   String?   @db.Text
+  esVerificado Boolean   @default(false) @map("es_verificado")
+  esAprobado   Boolean   @default(false) @map("es_aprobado")
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt    DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt    DateTime? @map("deleted_at") @db.Timestamptz
+
+  // Relaciones
+  producto Producto @relation(fields: [productoId], references: [id], onDelete: Cascade)
+  cliente  Cliente  @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+
+  @@unique([productoId, clienteId])
+  @@index([productoId])
+  @@index([clienteId])
+  @@map("resenas")
+}
+
+// ==========================================
+// FAVORITOS (Wishlist)
+// ==========================================
+
+model Favorito {
+  id         String   @id @default(uuid()) @db.Uuid
+  clienteId  String   @map("cliente_id") @db.Uuid
+  productoId String   @map("producto_id") @db.Uuid
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  // Relaciones
+  cliente  Cliente  @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  producto Producto @relation(fields: [productoId], references: [id], onDelete: Cascade)
+
+  @@unique([clienteId, productoId])
+  @@index([clienteId])
+  @@index([productoId])
+  @@map("favoritos")
+}
+
+
+// ==========================================
+// CÓDIGOS PROMOCIONALES
+// ==========================================
+
+model CodigoPromocional {
+  id               String   @id @default(uuid()) @db.Uuid
+  codigo           String   @unique @db.VarChar(50)
+  descuento        Decimal  @db.Decimal(12, 2)
+  esPorcentaje     Boolean  @default(true) @map("es_porcentaje")
+  activo           Boolean  @default(true)
+  fechaExpiracion  DateTime? @map("fecha_expiracion") @db.Timestamptz
+  usosMaximos      Int?      @map("usos_maximos")
+  usosActuales     Int       @default(0) @map("usos_actuales")
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+
+  // Relaciones
+  ordenes          Orden[]
+
+  @@map("codigos_promocionales")
+}

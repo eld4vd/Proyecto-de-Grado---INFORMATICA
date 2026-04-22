@@ -1,0 +1,21 @@
+{
+  "name": "SicaBit - Tienda de Tecnología",
+  "short_name": "SicaBit",
+  "description": "La mejor tienda de computadoras, laptops, componentes y accesorios tecnológicos en Bolivia",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#050505",
+  "theme_color": "#95D600",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["shopping", "technology"],
+  "lang": "es",
+  "dir": "ltr"
+}

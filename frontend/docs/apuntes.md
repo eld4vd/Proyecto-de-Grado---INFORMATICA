@@ -1,0 +1,68 @@
+- Pages inicial cambiar por hola mundo
+- directorio como funciona , carpeta app como funciona
+- Como funciona enrutamiento , React Server componest cont - client component, 
+- Router convenciones  - enrutamiento con carpetas
+- enrutamiento anidadas, rutas dinamicas , 
+- catch all segmentos
+- pagina 404 editar
+- carpetas privadas (`_micarpeta`)
+- grupos de rutas
+- layouts (diseño)
+- layouts (diseño anidados)
+- Layouts de raiz multiples
+- routing metada  , metadatos rules, static metadata, dynamic metadata , handling metada in client components 
+- titulo de metadatos (3 fases
+- Link component navigation 
+- Enlaces activos
+- params and searchParams
+- navegacion programatica
+- plantilla archivo( template.tsx)
+- carga de la interfaz de usuario (loading.tsx)
+- manejo de errores (error.tsx)
+- recuperacion de errores
+- manejo de errores en rutas anidadas
+- manejo de errores en los diseños
+- Manejo de errores globales
+- Rutas paralelas (dashboard ,etc,etc,)
+- rutas no coincidentes (entrar a una pagina con link sin alterar a las otras )
+- rutas condicionales 
+- Intercepting Routes
+- Interceptación de rutas paralelas (galeria de fotos ejemplo)
+- route handlers (Manejadores de ruta)
+- Manejo de solicitudes GET
+- Manejo de solicitudes POST
+- Manejadores de rutas dinámicas
+- Manejo de soicitudes PATCH
+- Manejo de solciitudes DELETE 
+- parametros de consultas URL
+- encabezadores de manejadores de ruta
+- Cookies en controladores de ruta
+- Redirecciones en controladores de ruta
+- Almacenamiento en caché en controladores de ruta
+- middleware
+- Representación del lado del cliente RSC 
+- Representación del lado del servidor SSR
+- Suspense SSR
+- Componentes del servidor React
+- Componentes de cliente y servidor RSC SSR
+- Ciclo de vida de renderizado de RSC
+- Renderizado estatico
+- Renderizado dinamico
+- generate Static Params 
+- dynamicParams
+- Transmision (Streaming)
+- Patrones de composición de servidor y cliente
+- Código exclusivo para servidor
+- import server-only ( nota para mi no mas npm i server-only)
+- paquetes de terceros ( third-party packages)
+- Proveedores de contexto
+- Client-only code
+- Ubicación de componentes del cliente (Client Component placement)
+- Intercalación de componentes de servidor y cliente
+- Obtencion de datos
+- Obtención de datos en componentes de cliente ([jsonplaceholder.typicode.com/users](https://jsonplaceholder.typicode.com/users))
+- Obtención de datos en componentes del servidor
+- Estados de carga y error
+- Obtención secuencial de datos 
+- Obtención de datos en paralelo
+- Fetching from a Database
