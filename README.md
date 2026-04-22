@@ -13,7 +13,7 @@
 ---
 
 <div align="center">
-  <img src="./assets/sicabit-home.png" alt="SicaBit Vista Principal" width="850" style="border-radius: 10px; border: 1px solid #ddd;" />
+  <img src="./assets/home.png" alt="SicaBit Vista Principal" width="850" style="border-radius: 10px; border: 1px solid #ddd;" />
 </div>
 
 ---
