@@ -7,7 +7,7 @@
     <em>Proyecto de Grado — Modalidad: Monografía</em>
   </p>
   
-  <p><strong>Autor / Postulante:</strong> David Bejarano</p>
+  <p><strong>Hecho por: </strong>J David Bejarano CH</p>
 </div>
 
 ---
